@@ -4,6 +4,7 @@ import {
   AppStateStatus,
   Button,
   Linking,
+  Platform,
   StyleSheet,
   View,
 } from 'react-native';
@@ -18,6 +19,7 @@ import {
 } from 'react-native-safe-area-context';
 import {useUserStore} from '@/store';
 import CookieManager from '@react-native-cookies/cookies';
+import DeviceInfo from 'react-native-device-info';
 
 export default function WebViewContainer(): React.JSX.Element {
   const [appState, setAppState] = useState(AppState.currentState);
@@ -109,7 +111,10 @@ export default function WebViewContainer(): React.JSX.Element {
               style={{height: insets?.top, backgroundColor: topSafeAreaColor}}
             />
             <WebView
-              userAgent="SnackgameApp"
+              // userAgent="asdf"
+              userAgent={`SnackgameApp/1.0 (${
+                Platform.OS
+              } ${DeviceInfo.getSystemVersion()}; ${DeviceInfo.getModel()}) AppleWebKit/537.36 (KHTML, like Gecko) Mobile Safari/537.36`}
               ref={webViewRef}
               originWhitelist={['*']}
               source={{uri}}
