@@ -1,22 +1,39 @@
-import React, {useRef, useState} from 'react';
-import {Dimensions, Linking, StyleSheet} from 'react-native';
-import WebView, {WebViewNavigation} from 'react-native-webview';
+import React, {useEffect, useRef, useState} from 'react';
+import {
+  AppState,
+  AppStateStatus,
+  Button,
+  Linking,
+  StyleSheet,
+  View,
+} from 'react-native';
+import WebView, {
+  WebViewMessageEvent,
+  WebViewNavigation,
+} from 'react-native-webview';
 import {PATH} from './constants/path.constants';
-import {SafeAreaView} from 'react-native-safe-area-context';
-
-const windowWidth = Dimensions.get('window').width;
-const windowHeight = Dimensions.get('window').height;
+import {
+  SafeAreaInsetsContext,
+  SafeAreaProvider,
+} from 'react-native-safe-area-context';
+import {useUserStore} from '@/store';
+import CookieManager from '@react-native-cookies/cookies';
 
 export default function WebViewContainer(): React.JSX.Element {
-  const uri = PATH.GAME;
+  const [appState, setAppState] = useState(AppState.currentState);
+
+  const userStore = useUserStore(state => state);
+  const [uri] = useState('https://dev.snackga.me/snack-game');
+
   const webViewRef = useRef<WebView>(null);
-  const [statusBarColor, setStatusBarColor] = useState<string>('#FFEDD5');
+  const [topSafeAreaColor, setTopSafeAreaColor] = useState('#FFEDD5');
+  const [bottomSafeAreaColor] = useState('#FCF9F7');
 
   const onNavigationStateChange = (navState: WebViewNavigation) => {
     if (navState.url === PATH.AUTH || navState.url === PATH.GAME) {
-      setStatusBarColor('#FFEDD5');
+      setTopSafeAreaColor('#FFEDD5');
     } else {
-      setStatusBarColor('#FCF9F7');
+      setTopSafeAreaColor('#FCF9F7');
     }
   };
 
@@ -28,28 +45,96 @@ export default function WebViewContainer(): React.JSX.Element {
     return true;
   };
 
+  const onMessage = async (e: WebViewMessageEvent) => {
+    const data = JSON.parse(e.nativeEvent.data);
+    if (data.type === 'loggedOut') {
+      console.log('loggedOut');
+      await CookieManager.clearAll();
+      userStore.clearUser();
+    }
+  };
+
+  const injectedJavaScript = `
+    window.addEventListener('loggedOut', ()=>{
+      window.ReactNativeWebView.postMessage(
+        JSON.stringify({
+          type: 'loggedOut',
+        })
+      );
+    });
+  `;
+
+  useEffect(() => {
+    const handleAppStateChange = (nextAppState: AppStateStatus) => {
+      if (appState.match(/inactive|background/) && nextAppState === 'active') {
+        console.log('App has come to the foreground!');
+        webViewRef?.current?.postMessage(
+          JSON.stringify({event: 'app-foreground'}),
+        );
+      }
+      if (appState === 'active' && nextAppState.match(/inactive|background/)) {
+        console.log('App has gone to the background!');
+        webViewRef?.current?.postMessage(
+          JSON.stringify({event: 'app-background'}),
+        );
+      }
+      setAppState(nextAppState);
+    };
+
+    const subscription = AppState.addEventListener(
+      'change',
+      handleAppStateChange,
+    );
+
+    return () => {
+      subscription.remove();
+    };
+  }, [appState]);
+
+  useEffect(() => {
+    (async () => {
+      await CookieManager.setFromResponse(
+        'https://dev-api.snackga.me',
+        userStore.cookie![0],
+      );
+    })();
+  }, [userStore]);
+
   return (
-    <SafeAreaView
-      edges={['top']}
-      style={{
-        ...styles.container,
-        backgroundColor: statusBarColor,
-      }}>
-      <WebView
-        style={styles.webview}
-        ref={webViewRef}
-        originWhitelist={['*']}
-        source={{uri}}
-        thirdPartyCookiesEnabled={true}
-        sharedCookiesEnabled={true}
-        onNavigationStateChange={onNavigationStateChange}
-        onShouldStartLoadWithRequest={onShouldStartLoadWithRequest}
-        onContentProcessDidTerminate={() => webViewRef.current?.reload()}
-        scalesPageToFit={true}
-        bounces={false}
-        webviewDebuggingEnabled
-      />
-    </SafeAreaView>
+    <SafeAreaProvider>
+      <SafeAreaInsetsContext.Consumer>
+        {insets => (
+          <View style={styles.container}>
+            <View
+              style={{height: insets?.top, backgroundColor: topSafeAreaColor}}
+            />
+            <WebView
+              userAgent="SnackgameApp"
+              ref={webViewRef}
+              originWhitelist={['*']}
+              source={{uri}}
+              thirdPartyCookiesEnabled={true}
+              sharedCookiesEnabled={true}
+              onNavigationStateChange={onNavigationStateChange}
+              onShouldStartLoadWithRequest={onShouldStartLoadWithRequest}
+              onContentProcessDidTerminate={() => webViewRef.current?.reload()}
+              scalesPageToFit={true}
+              bounces={false}
+              webviewDebuggingEnabled
+              onMessage={onMessage}
+              injectedJavaScriptBeforeContentLoaded={injectedJavaScript}
+              decelerationRate={0.99}
+            />
+            <View
+              style={{
+                height: insets?.bottom,
+                backgroundColor: bottomSafeAreaColor,
+              }}
+            />
+          </View>
+        )}
+      </SafeAreaInsetsContext.Consumer>
+    </SafeAreaProvider>
   );
 }
 
@@ -57,9 +142,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  webview: {
-    flex: 1,
-    width: windowWidth,
-    height: windowHeight,
+  bottom: {
+    backgroundColor: '#FCF9F7',
   },
 });
