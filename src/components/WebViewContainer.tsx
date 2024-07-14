@@ -1,13 +1,6 @@
 import React, {useEffect, useRef, useState} from 'react';
-import {
-  AppState,
-  AppStateStatus,
-  Button,
-  Linking,
-  Platform,
-  StyleSheet,
-  View,
-} from 'react-native';
+import EStyleSheet from 'react-native-extended-stylesheet';
+import {AppState, AppStateStatus, Linking, Platform, View} from 'react-native';
 import WebView, {
   WebViewMessageEvent,
   WebViewNavigation,
@@ -131,10 +124,10 @@ export default function WebViewContainer(): React.JSX.Element {
               style={{backgroundColor: topSafeAreaColor}}
             />
             <View
-              style={{
-                height: insets?.bottom,
-                backgroundColor: bottomSafeAreaColor,
-              }}
+              style={[
+                {height: insets?.bottom, backgroundColor: bottomSafeAreaColor},
+                styles.bottomSafeArea,
+              ]}
             />
           </View>
         )}
@@ -143,11 +136,15 @@ export default function WebViewContainer(): React.JSX.Element {
   );
 }
 
-const styles = StyleSheet.create({
+EStyleSheet.build();
+const styles = EStyleSheet.create({
   container: {
     flex: 1,
   },
   bottom: {
     backgroundColor: '#FCF9F7',
+  },
+  bottomSafeArea: {
+    maxHeight: '1.25rem',
   },
 });
