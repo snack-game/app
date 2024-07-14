@@ -111,7 +111,6 @@ export default function WebViewContainer(): React.JSX.Element {
               style={{height: insets?.top, backgroundColor: topSafeAreaColor}}
             />
             <WebView
-              // userAgent="asdf"
               userAgent={`SnackgameApp/1.0 (${
                 Platform.OS
               } ${DeviceInfo.getSystemVersion()}; ${DeviceInfo.getModel()}) AppleWebKit/537.36 (KHTML, like Gecko) Mobile Safari/537.36`}
@@ -124,11 +123,12 @@ export default function WebViewContainer(): React.JSX.Element {
               onShouldStartLoadWithRequest={onShouldStartLoadWithRequest}
               onContentProcessDidTerminate={() => webViewRef.current?.reload()}
               scalesPageToFit={true}
-              bounces={false}
+              bounces={true}
               webviewDebuggingEnabled
               onMessage={onMessage}
               injectedJavaScriptBeforeContentLoaded={injectedJavaScript}
-              decelerationRate={0.99}
+              decelerationRate="normal"
+              style={{backgroundColor: topSafeAreaColor}}
             />
             <View
               style={{
