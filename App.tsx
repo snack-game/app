@@ -6,8 +6,6 @@ import {useUserStore} from '@/store';
 import LoginView from '@/components/LoginView';
 import WebViewContainer from '@/components/WebViewContainer';
 import {requestMemberDetails} from '@/apis/Auth';
-import CookieManager from '@react-native-cookies/cookies';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 function App(): React.JSX.Element {
   const userStore = useUserStore(state => state);
@@ -33,8 +31,8 @@ function App(): React.JSX.Element {
   // };
 
   useEffect(() => {
-    AsyncStorage.clear();
-    CookieManager.clearAll();
+    // AsyncStorage.clear();
+    // CookieManager.clearAll();
     (async () => {
       if (userStore.user) {
         const member = await requestMemberDetails();
@@ -48,6 +46,18 @@ function App(): React.JSX.Element {
   return (
     <View style={styles.background}>
       {!userStore.user ? <LoginView /> : <WebViewContainer />}
+      {/* <Button
+        title="req"
+        onPress={async () => {
+          await requestMemberDetails();
+        }}
+      />
+      <Button
+        title="remove cookies"
+        onPress={async () => {
+          await CookieManager.clearAll();
+        }}
+      /> */}
     </View>
   );
 }

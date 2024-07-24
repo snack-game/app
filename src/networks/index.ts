@@ -56,21 +56,33 @@ client.interceptors.response.use(
       const status = error.response.status;
       const {code} = error.response.data;
       const originalRequest = error.config;
+      console.error(originalRequest);
       console.error(`status: ${status}, code: ${code}`);
       if (status === 401 && code === 'TOKEN_EXPIRED_EXCEPTION') {
+        console.log('renew requested');
         await requestRenew();
-        originalRequest._renewal = true;
+        console.log('renew succeeded');
         return request(originalRequest);
       }
       if (
-        originalRequest._renewal &&
         status === 401 &&
-        (code === 'REFRESH_TOKEN_EXPIRED_EXCEPTION' ||
-          code === 'TOKEN_UNRESOLVABLE_EXCEPTION')
+        originalRequest.method === 'patch' &&
+        originalRequest.url === '/tokens/me' &&
+        code === 'REFRESH_TOKEN_EXPIRED_EXCEPTION'
       ) {
+        console.log('logout due to refresh token expired');
         await requestSignOut();
-        useUserStore.getState().clear();
         await CookieManager.clearAll();
+        useUserStore.getState().clear();
+      }
+      if (
+        status === 401 &&
+        useUserStore.getState().user &&
+        code === 'TOKEN_UNRESOLVABLE_EXCEPTION'
+      ) {
+        console.log('logout due to missing token');
+        await CookieManager.clearAll();
+        useUserStore.getState().clear();
       }
     }
     return Promise.reject(error);

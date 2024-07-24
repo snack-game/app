@@ -46,12 +46,18 @@ export default function WebViewContainer(): React.JSX.Element {
       'https://dev-api.snackga.me/tokens/me',
     );
     return Object.entries(cookies).map(([key, value]) => {
-      let cookieString = `${key}=${value.value}; domain=.snackga.me; path=${value.path}`;
+      let cookieString = `${key}=${value.value}; domain=.snackga.me; path=${
+        value.path
+      }; expires=${new Date(value.expires!).toUTCString()}`;
       return `document.cookie = "${cookieString}";`;
     });
   };
 
   const injectedJavaScript = `
+  const meta = document.createElement('meta');
+   meta.setAttribute('content', 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no');
+    meta.setAttribute('name', 'viewport'); 
+    document.getElementsByTagName('head')[0].appendChild(meta);
     window.addEventListener('loggedOut', ()=>{
       window.ReactNativeWebView.postMessage(
         JSON.stringify({
@@ -76,12 +82,14 @@ export default function WebViewContainer(): React.JSX.Element {
     }
     if (data.type === 'app-refresh-requested') {
       try {
+        console.log('renew requested from web');
         await requestRenew();
         const scripts = await createCookieScripts();
         scripts.forEach(it => webViewRef.current?.injectJavaScript(it));
         webViewRef.current?.injectJavaScript(
           "dispatchEvent(new CustomEvent('app-refreshed')); true;",
         );
+        console.log('renew succeded, event dispatched');
       } catch (error) {
         webViewRef.current?.injectJavaScript(
           "dispatchEvent(new CustomEvent('app-refresh-failed')); true;",
@@ -138,7 +146,7 @@ export default function WebViewContainer(): React.JSX.Element {
               onNavigationStateChange={onNavigationStateChange}
               onShouldStartLoadWithRequest={onShouldStartLoadWithRequest}
               onContentProcessDidTerminate={() => webViewRef.current?.reload()}
-              scalesPageToFit={true}
+              scalesPageToFit={false}
               bounces={true}
               webviewDebuggingEnabled
               onMessage={onWebViewMessage}
