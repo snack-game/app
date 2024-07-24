@@ -20,6 +20,7 @@ import {
   appleAuth,
   AppleButton,
 } from '@invertase/react-native-apple-authentication';
+import {useUserStore} from '@/store';
 
 function LoginView(): React.JSX.Element {
   const translateY = useSharedValue(0);
@@ -28,18 +29,20 @@ function LoginView(): React.JSX.Element {
       transform: [{translateY: translateY.value}],
     };
   });
+  const userStore = useUserStore(state => state);
 
   const signInWithGoogle = async () => {
     await GoogleSignin.hasPlayServices();
     const userInfo = await GoogleSignin.signIn();
-    await requestSignIn(userInfo);
+    const member = await requestSignIn(userInfo);
+    userStore.saveUser(member);
   };
 
   const signInWithKakao = async () => {
     try {
       const token = await login();
-      const data = await requestSignIn(token);
-      console.log(data);
+      const member = await requestSignIn(token);
+      userStore.saveUser(member);
     } catch (err) {
       console.error('Login Failed:', err);
     }
@@ -52,13 +55,13 @@ function LoginView(): React.JSX.Element {
     });
 
     const {identityToken} = response;
-    const data = await requestSignIn({idToken: identityToken});
-    console.log(data);
+    const member = await requestSignIn({idToken: identityToken});
+    userStore.saveUser(member);
   };
 
   const signInAsGuest = async () => {
-    const data = await requestSignInAsGuest();
-    console.log(data);
+    const member = await requestSignInAsGuest();
+    userStore.saveUser(member);
   };
 
   useEffect(() => {

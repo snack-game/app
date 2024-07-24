@@ -5,5 +5,5 @@ export const storageKey = {
 
 export interface Store {
   hasHydrated?: boolean;
-  clear?: () => void;
+  clear: () => void;
 }

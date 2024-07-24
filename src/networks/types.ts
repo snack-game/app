@@ -1,6 +1,6 @@
 import {AxiosError, AxiosResponse} from 'axios';
 
-export type HttpMethod = 'get' | 'post' | 'put' | 'delete';
+export type HttpMethod = 'get' | 'post' | 'put' | 'delete' | 'patch';
 
 export interface RequestParams {
   method: HttpMethod;

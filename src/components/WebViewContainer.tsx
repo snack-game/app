@@ -13,12 +13,13 @@ import {
 import {useUserStore} from '@/store';
 import CookieManager from '@react-native-cookies/cookies';
 import DeviceInfo from 'react-native-device-info';
+import {requestRenew} from '@/apis/Auth';
 
 export default function WebViewContainer(): React.JSX.Element {
   const [appState, setAppState] = useState(AppState.currentState);
 
   const userStore = useUserStore(state => state);
-  const [uri] = useState('https://dev.snackga.me/snack-game');
+  const [uri, navigateTo] = useState('https://dev.snackga.me/snack-game');
 
   const webViewRef = useRef<WebView>(null);
   const [topSafeAreaColor, setTopSafeAreaColor] = useState('#FFEDD5');
@@ -40,13 +41,14 @@ export default function WebViewContainer(): React.JSX.Element {
     return true;
   };
 
-  const onMessage = async (e: WebViewMessageEvent) => {
-    const data = JSON.parse(e.nativeEvent.data);
-    if (data.type === 'loggedOut') {
-      console.log('loggedOut');
-      await CookieManager.clearAll();
-      userStore.clearUser();
-    }
+  const createCookieScripts = async () => {
+    const cookies = await CookieManager.get(
+      'https://dev-api.snackga.me/tokens/me',
+    );
+    return Object.entries(cookies).map(([key, value]) => {
+      let cookieString = `${key}=${value.value}; domain=.snackga.me; path=${value.path}`;
+      return `document.cookie = "${cookieString}";`;
+    });
   };
 
   const injectedJavaScript = `
@@ -57,7 +59,38 @@ export default function WebViewContainer(): React.JSX.Element {
         })
       );
     });
+    window.addEventListener('app-refresh-requested', ()=>{
+      window.ReactNativeWebView.postMessage(
+        JSON.stringify({
+          type: 'app-refresh-requested',
+        })
+      );
+    });
   `;
+
+  const onWebViewMessage = async (e: WebViewMessageEvent) => {
+    const data = JSON.parse(e.nativeEvent.data);
+    if (data.type === 'loggedOut') {
+      await CookieManager.clearAll();
+      userStore.clear();
+    }
+    if (data.type === 'app-refresh-requested') {
+      try {
+        await requestRenew();
+        const scripts = await createCookieScripts();
+        scripts.forEach(it => webViewRef.current?.injectJavaScript(it));
+        webViewRef.current?.injectJavaScript(
+          "dispatchEvent(new CustomEvent('app-refreshed')); true;",
+        );
+      } catch (error) {
+        webViewRef.current?.injectJavaScript(
+          "dispatchEvent(new CustomEvent('app-refresh-failed')); true;",
+        );
+        await CookieManager.clearAll();
+        userStore.clear();
+      }
+    }
+  };
 
   useEffect(() => {
     const handleAppStateChange = (nextAppState: AppStateStatus) => {
@@ -86,15 +119,6 @@ export default function WebViewContainer(): React.JSX.Element {
     };
   }, [appState]);
 
-  useEffect(() => {
-    (async () => {
-      await CookieManager.setFromResponse(
-        'https://dev-api.snackga.me',
-        userStore.cookie![0],
-      );
-    })();
-  }, [userStore]);
-
   return (
     <SafeAreaProvider>
       <SafeAreaInsetsContext.Consumer>
@@ -108,7 +132,6 @@ export default function WebViewContainer(): React.JSX.Element {
                 Platform.OS
               } ${DeviceInfo.getSystemVersion()}; ${DeviceInfo.getModel()}) AppleWebKit/537.36 (KHTML, like Gecko) Mobile Safari/537.36`}
               ref={webViewRef}
-              originWhitelist={['*']}
               source={{uri}}
               thirdPartyCookiesEnabled={true}
               sharedCookiesEnabled={true}
@@ -118,7 +141,7 @@ export default function WebViewContainer(): React.JSX.Element {
               scalesPageToFit={true}
               bounces={true}
               webviewDebuggingEnabled
-              onMessage={onMessage}
+              onMessage={onWebViewMessage}
               injectedJavaScriptBeforeContentLoaded={injectedJavaScript}
               decelerationRate="normal"
               style={{backgroundColor: topSafeAreaColor}}

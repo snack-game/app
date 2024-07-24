@@ -4,19 +4,17 @@ import {createJSONStorage, persist} from 'zustand/middleware';
 import {storageKey} from '../types';
 import {UserStore} from './types';
 
-const initialData: Pick<UserStore, 'user' | 'cookie'> = {
+const initialData: Pick<UserStore, 'user'> = {
   user: undefined,
-  cookie: undefined,
 };
 
 const useUserStore = create<UserStore>()(
   persist<UserStore>(
     set => ({
       hasHydrated: false,
-      ...initialData,
+      clear: () => set(() => ({...initialData})),
       saveUser: (user: any) => set({user}),
-      saveCookie: cookie => set({cookie}),
-      clearUser: () => set(() => ({...initialData})),
+      ...initialData,
     }),
     {
       name: storageKey.USER_STORE,

@@ -1,36 +1,79 @@
 import axios, {AxiosResponse} from 'axios';
-import {get, set} from 'lodash';
 import qs from 'qs';
 import {RequestParams} from './types';
 import {useUserStore} from '@/store';
+import {requestRenew, requestSignOut} from '@/apis/Auth';
+import CookieManager from '@react-native-cookies/cookies';
 
 export const client = axios.create({
   timeout: 30000,
   paramsSerializer: (params: unknown) =>
     qs.stringify(params, {arrayFormat: 'repeat'}),
-  withCredentials: true,
+  // withCredentials: true,
   baseURL: 'https://dev-api.snackga.me/',
 });
 
-client.interceptors.request.use(config => {
-  const {cookie} = useUserStore.getState();
-  if (cookie) {
-    set(config, 'headers.cookie', cookie);
-  }
+// const saveCookies = async () => {
+//   const cookies = await CookieManager.get(client.defaults.baseURL!);
+//   await AsyncStorage.setItem('cookies', JSON.stringify(cookies));
+// };
+
+client.interceptors.request.use(async config => {
+  // const cookies = await CookieManager.getAll();
+  // set(
+  //   config,
+  //   'headers.Cookie',
+  //   `accessToken=${cookies['accessToken'].value}; refreshToken=${cookies['refreshToken'].value}`,
+  // );
+  // console.warn('cookie from cookieManager:', cookies);
+  // config.headers.Cookie = Object.entries(cookies)
+  //   .map(([name, value]) => `${name}=${value.value}`)
+  //   .join('; ');
+  // console.warn('using cookie to request:', config.headers.Cookie);
   return config;
 });
 
 client.interceptors.response.use(
-  response => {
-    const {headers} = response;
-    const cookie = get(headers, 'set-cookie');
-    if (cookie) {
-      useUserStore.getState().saveCookie(cookie);
-    }
+  async response => {
+    // const setCookieHeader = response.headers['set-cookie'];
+    // if (setCookieHeader) {
+    //   console.warn('set-cookie found:', setCookieHeader);
+    //   setCookieHeader.forEach(async cookie => {
+    //     console.log('cookies.forEach => ', cookie);
+    //     await CookieManager.setFromResponse(response.config.baseURL!, cookie);
+    //   });
+    // const cmga = await CookieManager.getAll();
+    // console.log('cookiemanager.getall=>', cmga);
+    // saveCookies();
+    // if (setCookieHeader) {
+    //   console.warn('setted cookies=>', await CookieManager.getAll());
+    // }
+    // }
     return response;
   },
-  err => {
-    return Promise.reject(err);
+  async error => {
+    if (error.response) {
+      const status = error.response.status;
+      const {code} = error.response.data;
+      const originalRequest = error.config;
+      console.error(`status: ${status}, code: ${code}`);
+      if (status === 401 && code === 'TOKEN_EXPIRED_EXCEPTION') {
+        await requestRenew();
+        originalRequest._renewal = true;
+        return request(originalRequest);
+      }
+      if (
+        originalRequest._renewal &&
+        status === 401 &&
+        (code === 'REFRESH_TOKEN_EXPIRED_EXCEPTION' ||
+          code === 'TOKEN_UNRESOLVABLE_EXCEPTION')
+      ) {
+        await requestSignOut();
+        useUserStore.getState().clear();
+        await CookieManager.clearAll();
+      }
+    }
+    return Promise.reject(error);
   },
 );
 
@@ -55,6 +98,8 @@ export const request = async <T>({
       return client.put(url, requestBody, {params: queryParams, headers});
     case 'delete':
       return client.delete(url, {data: requestBody, params: queryParams});
+    case 'patch':
+      return client.patch(url, requestBody, {params: queryParams, headers});
     default:
       return Promise.reject(new Error('Invalid HttpMethod'));
   }

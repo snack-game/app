@@ -1,11 +1,14 @@
 import {Member} from '@/apis/Auth/types';
 import {Store} from '../types';
 
+interface Token {
+  accessToken: string;
+  refreshToken: string;
+  originalResponse: string;
+}
+
 export interface UserStore extends Store {
   user?: Member;
-  cookie?: string[];
 
   saveUser: (user?: Member) => void;
-  saveCookie: (val?: string[]) => void;
-  clearUser: () => void;
 }
