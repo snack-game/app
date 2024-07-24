@@ -26,6 +26,12 @@ export default function WebViewContainer(): React.JSX.Element {
   const [bottomSafeAreaColor] = useState('#FCF9F7');
 
   const onNavigationStateChange = (navState: WebViewNavigation) => {
+    webViewRef.current?.injectJavaScript(`  
+      const meta = document.createElement('meta');
+      meta.setAttribute('content', 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no');
+      meta.setAttribute('name', 'viewport'); 
+      document.getElementsByTagName('head')[0].appendChild(meta);
+    `);
     if (navState.url === PATH.AUTH || navState.url === PATH.GAME) {
       setTopSafeAreaColor('#FFEDD5');
     } else {
@@ -54,10 +60,6 @@ export default function WebViewContainer(): React.JSX.Element {
   };
 
   const injectedJavaScript = `
-  const meta = document.createElement('meta');
-   meta.setAttribute('content', 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no');
-    meta.setAttribute('name', 'viewport'); 
-    document.getElementsByTagName('head')[0].appendChild(meta);
     window.addEventListener('loggedOut', ()=>{
       window.ReactNativeWebView.postMessage(
         JSON.stringify({
