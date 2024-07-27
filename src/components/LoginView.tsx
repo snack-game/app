@@ -1,10 +1,7 @@
 import React, {useEffect} from 'react';
 
-import {GoogleSignin} from '@react-native-google-signin/google-signin';
-import {login} from '@react-native-seoul/kakao-login';
-
 import {Image, Text, TouchableOpacity, View} from 'react-native';
-import {requestSignIn, requestSignInAsGuest} from '@/apis/Auth';
+import {requestSignInAsGuest} from '@/apis/Auth';
 import GoogleIcon from '@/assets/google-sign-in-icon.svg';
 import KakaoIcon from '@/assets/kakao-sign-in-icon.svg';
 import Logo from '@/assets/logo-snackgame-letter.png';
@@ -21,6 +18,7 @@ import {
   AppleButton,
 } from '@invertase/react-native-apple-authentication';
 import {useUserStore} from '@/store';
+import {useSocialSignIn} from '@/hooks/socialSignIn';
 
 function LoginView(): React.JSX.Element {
   const translateY = useSharedValue(0);
@@ -30,34 +28,7 @@ function LoginView(): React.JSX.Element {
     };
   });
   const userStore = useUserStore(state => state);
-
-  const signInWithGoogle = async () => {
-    await GoogleSignin.hasPlayServices();
-    const userInfo = await GoogleSignin.signIn();
-    const member = await requestSignIn(userInfo);
-    userStore.saveUser(member);
-  };
-
-  const signInWithKakao = async () => {
-    try {
-      const token = await login();
-      const member = await requestSignIn(token);
-      userStore.saveUser(member);
-    } catch (err) {
-      console.error('Login Failed:', err);
-    }
-  };
-
-  const signInWithApple = async () => {
-    const response = await appleAuth.performRequest({
-      requestedOperation: appleAuth.Operation.LOGIN,
-      requestedScopes: [appleAuth.Scope.EMAIL, appleAuth.Scope.FULL_NAME],
-    });
-
-    const {identityToken} = response;
-    const member = await requestSignIn({idToken: identityToken});
-    userStore.saveUser(member);
-  };
+  const socialSignIn = useSocialSignIn();
 
   const signInAsGuest = async () => {
     const member = await requestSignInAsGuest();
@@ -75,15 +46,6 @@ function LoginView(): React.JSX.Element {
     );
   });
 
-  useEffect(() => {
-    GoogleSignin.configure({
-      webClientId:
-        '487046925377-u8l39aus52uhrctl0lti5oq8hld612kj.apps.googleusercontent.com',
-      iosClientId:
-        '487046925377-spdjmn3ie7pnotp1orccp7becuf5d68g.apps.googleusercontent.com',
-    });
-  });
-
   return (
     <View style={styles.background}>
       <View style={styles.logoContainer}>
@@ -94,18 +56,20 @@ function LoginView(): React.JSX.Element {
       <View style={styles.container}>
         <TouchableOpacity
           style={styles.googleButton}
-          onPress={signInWithGoogle}>
+          onPress={() => socialSignIn('google')}>
           <GoogleIcon style={styles.icon} />
           <Text style={styles.googleButtonText}>구글 로그인</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.kakaoButton} onPress={signInWithKakao}>
+        <TouchableOpacity
+          style={styles.kakaoButton}
+          onPress={() => socialSignIn('kakao')}>
           <KakaoIcon style={styles.icon} />
           <Text style={styles.kakaoButtonText}>카카오 로그인</Text>
         </TouchableOpacity>
         {appleAuth.isSupported && (
           <AppleButton
             cornerRadius={12}
-            onPress={signInWithApple}
+            onPress={() => socialSignIn('apple')}
             style={styles.appleButton}
           />
         )}

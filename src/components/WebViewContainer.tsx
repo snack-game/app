@@ -14,6 +14,7 @@ import {useUserStore} from '@/store';
 import CookieManager from '@react-native-cookies/cookies';
 import DeviceInfo from 'react-native-device-info';
 import {requestRenew} from '@/apis/Auth';
+import {useSocialSignIn} from '@/hooks/socialSignIn';
 
 export default function WebViewContainer(): React.JSX.Element {
   const [appState, setAppState] = useState(AppState.currentState);
@@ -24,6 +25,8 @@ export default function WebViewContainer(): React.JSX.Element {
   const webViewRef = useRef<WebView>(null);
   const [topSafeAreaColor, setTopSafeAreaColor] = useState('#FFEDD5');
   const [bottomSafeAreaColor] = useState('#FCF9F7');
+
+  const socialSignIn = useSocialSignIn();
 
   const onNavigationStateChange = (navState: WebViewNavigation) => {
     webViewRef.current?.injectJavaScript(`
@@ -62,17 +65,25 @@ export default function WebViewContainer(): React.JSX.Element {
   };
 
   const injectedJavaScript = `
-    window.addEventListener('loggedOut', ()=>{
+    window.addEventListener('loggedOut', () => {
       window.ReactNativeWebView.postMessage(
         JSON.stringify({
           type: 'loggedOut',
         })
       );
     });
-    window.addEventListener('app-refresh-requested', ()=>{
+    window.addEventListener('app-refresh-requested', () => {
       window.ReactNativeWebView.postMessage(
         JSON.stringify({
           type: 'app-refresh-requested',
+        })
+      );
+    });
+    window.addEventListener('app-oauth-requested', event => {
+      window.ReactNativeWebView.postMessage(
+        JSON.stringify({
+          type: 'app-oauth-requested',
+          provider: event.detail.provider
         })
       );
     });
@@ -100,6 +111,18 @@ export default function WebViewContainer(): React.JSX.Element {
         );
         await CookieManager.clearAll();
         userStore.clear();
+      }
+    }
+    if (data.type === 'app-oauth-requested') {
+      try {
+        await socialSignIn(data.provider);
+        webViewRef.current?.injectJavaScript(
+          "dispatchEvent(new CustomEvent('app-oauth-succeded')); true;",
+        );
+      } catch (error) {
+        webViewRef.current?.injectJavaScript(
+          "dispatchEvent(new CustomEvent('app-oauth-failed')); true;",
+        );
       }
     }
   };
