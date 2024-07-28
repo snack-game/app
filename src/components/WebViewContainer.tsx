@@ -116,8 +116,10 @@ export default function WebViewContainer(): React.JSX.Element {
     if (data.type === 'app-oauth-requested') {
       try {
         await socialSignIn(data.provider);
+        const scripts = await createCookieScripts();
+        scripts.forEach(it => webViewRef.current?.injectJavaScript(it));
         webViewRef.current?.injectJavaScript(
-          "dispatchEvent(new CustomEvent('app-oauth-succeded')); true;",
+          "dispatchEvent(new CustomEvent('app-oauth-succeeded')); true;",
         );
       } catch (error) {
         webViewRef.current?.injectJavaScript(
