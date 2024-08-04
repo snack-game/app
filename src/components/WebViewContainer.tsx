@@ -57,9 +57,7 @@ export default function WebViewContainer(): React.JSX.Element {
       'https://dev-api.snackga.me/tokens/me',
     );
     return Object.entries(cookies).map(([key, value]) => {
-      let cookieString = `${key}=${value.value}; domain=.snackga.me; path=${
-        value.path
-      }; expires=${new Date(value.expires!).toUTCString()}`;
+      let cookieString = `${key}=${value.value}; domain=.snackga.me; path=${value.path}`;
       return `document.cookie = "${cookieString}";`;
     });
   };
