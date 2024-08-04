@@ -29,8 +29,14 @@ export default function WebViewContainer(): React.JSX.Element {
   const socialSignIn = useSocialSignIn();
 
   const onNavigationStateChange = (navState: WebViewNavigation) => {
+    const disableUserSelect =
+      '* { -webkit-user-select: none; -webkit-touch-callout: none; } input, textarea { -webkit-user-select: initial; } body {-webkit-user-select: none; -webkit-touch-callout: none;}';
     webViewRef.current?.injectJavaScript(`
       (function(){
+        var style = document.createElement('style');
+        style.innerHTML = '${disableUserSelect}';
+        document.getElementsByTagName('head')[0].appendChild(style);
+        
         const meta = document.createElement('meta');
         meta.setAttribute('content', 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no');
         meta.setAttribute('name', 'viewport'); 
@@ -180,6 +186,7 @@ export default function WebViewContainer(): React.JSX.Element {
               injectedJavaScriptBeforeContentLoaded={injectedJavaScript}
               decelerationRate="normal"
               style={{backgroundColor: topSafeAreaColor}}
+              allowsLinkPreview={false}
             />
             <View
               style={[
