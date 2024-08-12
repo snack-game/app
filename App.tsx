@@ -16,7 +16,7 @@ function App(): React.JSX.Element {
   //     const cookies: Cookies = JSON.parse(cookiesString);
   //     for (const [name, value] of Object.entries(cookies)) {
   //       // console.error(name, value.value);
-  //       await CookieManager.set('https://dev-api.snackga.me/', {
+  //       await CookieManager.set('https://api.snackga.me/', {
   //         name,
   //         value: value.value,
   //         domain: value.domain,

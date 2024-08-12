@@ -10,7 +10,7 @@ export const client = axios.create({
   paramsSerializer: (params: unknown) =>
     qs.stringify(params, {arrayFormat: 'repeat'}),
   // withCredentials: true,
-  baseURL: 'https://dev-api.snackga.me/',
+  baseURL: 'https://api.snackga.me/',
 });
 
 // const saveCookies = async () => {

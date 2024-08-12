@@ -20,7 +20,7 @@ export default function WebViewContainer(): React.JSX.Element {
   const [appState, setAppState] = useState(AppState.currentState);
 
   const userStore = useUserStore(state => state);
-  const [uri, navigateTo] = useState('https://dev.snackga.me/snack-game');
+  const [uri, navigateTo] = useState(PATH.GAME);
 
   const webViewRef = useRef<WebView>(null);
   const [topSafeAreaColor, setTopSafeAreaColor] = useState('#FFEDD5');
@@ -59,9 +59,7 @@ export default function WebViewContainer(): React.JSX.Element {
   };
 
   const createCookieScripts = async () => {
-    const cookies = await CookieManager.get(
-      'https://dev-api.snackga.me/tokens/me',
-    );
+    const cookies = await CookieManager.get('https://api.snackga.me/tokens/me');
     return Object.entries(cookies).map(([key, value]) => {
       let cookieString = `${key}=${value.value}; domain=.snackga.me; path=${value.path}`;
       return `document.cookie = "${cookieString}";`;
