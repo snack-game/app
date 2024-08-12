@@ -9,48 +9,11 @@ export const client = axios.create({
   timeout: 30000,
   paramsSerializer: (params: unknown) =>
     qs.stringify(params, {arrayFormat: 'repeat'}),
-  // withCredentials: true,
   baseURL: 'https://api.snackga.me/',
 });
 
-// const saveCookies = async () => {
-//   const cookies = await CookieManager.get(client.defaults.baseURL!);
-//   await AsyncStorage.setItem('cookies', JSON.stringify(cookies));
-// };
-
-client.interceptors.request.use(async config => {
-  // const cookies = await CookieManager.getAll();
-  // set(
-  //   config,
-  //   'headers.Cookie',
-  //   `accessToken=${cookies['accessToken'].value}; refreshToken=${cookies['refreshToken'].value}`,
-  // );
-  // console.warn('cookie from cookieManager:', cookies);
-  // config.headers.Cookie = Object.entries(cookies)
-  //   .map(([name, value]) => `${name}=${value.value}`)
-  //   .join('; ');
-  // console.warn('using cookie to request:', config.headers.Cookie);
-  return config;
-});
-
 client.interceptors.response.use(
-  async response => {
-    // const setCookieHeader = response.headers['set-cookie'];
-    // if (setCookieHeader) {
-    //   console.warn('set-cookie found:', setCookieHeader);
-    //   setCookieHeader.forEach(async cookie => {
-    //     console.log('cookies.forEach => ', cookie);
-    //     await CookieManager.setFromResponse(response.config.baseURL!, cookie);
-    //   });
-    // const cmga = await CookieManager.getAll();
-    // console.log('cookiemanager.getall=>', cmga);
-    // saveCookies();
-    // if (setCookieHeader) {
-    //   console.warn('setted cookies=>', await CookieManager.getAll());
-    // }
-    // }
-    return response;
-  },
+  response => response,
   async error => {
     if (error.response) {
       const status = error.response.status;

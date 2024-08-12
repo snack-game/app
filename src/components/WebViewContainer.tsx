@@ -43,7 +43,7 @@ export default function WebViewContainer(): React.JSX.Element {
         document.getElementsByTagName('head')[0].appendChild(meta);
       })()
     `);
-    if (navState.url === PATH.AUTH || navState.url === PATH.GAME) {
+    if (navState.url === PATH.GAME) {
       setTopSafeAreaColor('#FFEDD5');
     } else {
       setTopSafeAreaColor('#FCF9F7');

@@ -10,29 +10,7 @@ import {requestMemberDetails} from '@/apis/Auth';
 function App(): React.JSX.Element {
   const userStore = useUserStore(state => state);
 
-  // const loadCookies = async () => {
-  //   const cookiesString = await AsyncStorage.getItem('cookies');
-  //   if (cookiesString) {
-  //     const cookies: Cookies = JSON.parse(cookiesString);
-  //     for (const [name, value] of Object.entries(cookies)) {
-  //       // console.error(name, value.value);
-  //       await CookieManager.set('https://api.snackga.me/', {
-  //         name,
-  //         value: value.value,
-  //         domain: value.domain,
-  //         path: value.path,
-  //         version: value.version,
-  //         expires: value.expires,
-  //         httpOnly: value.httpOnly,
-  //         secure: value.secure,
-  //       });
-  //     }
-  //   }
-  // };
-
   useEffect(() => {
-    // AsyncStorage.clear();
-    // CookieManager.clearAll();
     (async () => {
       if (userStore.user) {
         const member = await requestMemberDetails();
@@ -46,18 +24,6 @@ function App(): React.JSX.Element {
   return (
     <View style={styles.background}>
       {!userStore.user ? <LoginView /> : <WebViewContainer />}
-      {/* <Button
-        title="req"
-        onPress={async () => {
-          await requestMemberDetails();
-        }}
-      />
-      <Button
-        title="remove cookies"
-        onPress={async () => {
-          await CookieManager.clearAll();
-        }}
-      /> */}
     </View>
   );
 }
