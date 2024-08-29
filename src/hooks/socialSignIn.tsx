@@ -23,8 +23,9 @@ export const useSocialSignIn = () => {
       const member = await requestSignIn(userInfo);
       userStore.saveUser(member);
     }
-    catch (e) {
-      console.error(e);
+    catch (err) {
+      console.error(err);
+      throw err;
     }
   };
   const signInWithKakao = async () => {
@@ -34,6 +35,7 @@ export const useSocialSignIn = () => {
       userStore.saveUser(member);
     } catch (err) {
       console.error('Login Failed:', err);
+      throw err;
     }
   };
 
