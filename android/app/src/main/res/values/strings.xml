@@ -1,3 +1,4 @@
 <resources>
-    <string name="app_name">SnackGameApp</string>
+    <string name="app_name">스낵게임</string>
+    <string name="kakao_app_key">4e2d2d2300a480af7ec29c14a2f31aa3</string>
 </resources>

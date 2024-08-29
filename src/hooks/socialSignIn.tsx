@@ -1,9 +1,9 @@
-import {appleAuth} from '@invertase/react-native-apple-authentication';
+import { appleAuth } from '@invertase/react-native-apple-authentication';
 
-import {GoogleSignin} from '@react-native-google-signin/google-signin';
-import {login} from '@react-native-seoul/kakao-login';
-import {requestSignIn} from '@/apis/Auth';
-import {useUserStore} from '@/store';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import { login } from '@react-native-seoul/kakao-login';
+import { requestSignIn } from '@/apis/Auth';
+import { useUserStore } from '@/store';
 
 type Provider = 'google' | 'kakao' | 'apple';
 
@@ -18,9 +18,14 @@ export const useSocialSignIn = () => {
         '487046925377-spdjmn3ie7pnotp1orccp7becuf5d68g.apps.googleusercontent.com',
     });
     await GoogleSignin.hasPlayServices();
-    const userInfo = await GoogleSignin.signIn();
-    const member = await requestSignIn(userInfo);
-    userStore.saveUser(member);
+    try {
+      const userInfo = await GoogleSignin.signIn();
+      const member = await requestSignIn(userInfo);
+      userStore.saveUser(member);
+    }
+    catch (e) {
+      console.error(e);
+    }
   };
   const signInWithKakao = async () => {
     try {
@@ -38,8 +43,8 @@ export const useSocialSignIn = () => {
       requestedScopes: [appleAuth.Scope.EMAIL, appleAuth.Scope.FULL_NAME],
     });
 
-    const {identityToken} = response;
-    const member = await requestSignIn({idToken: identityToken});
+    const { identityToken } = response;
+    const member = await requestSignIn({ idToken: identityToken });
     userStore.saveUser(member);
   };
 

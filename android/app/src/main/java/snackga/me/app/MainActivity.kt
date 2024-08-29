@@ -1,4 +1,4 @@
-package com.snackgameapp
+package snackga.me.app
 
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate
