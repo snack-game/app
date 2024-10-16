@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "487046925377",
+    "project_id": "snackgame",
+    "storage_bucket": "snackgame.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:487046925377:android:278b6242eb98715dbbcac0",
+        "android_client_info": {
+          "package_name": "snackga.me.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "487046925377-u8l39aus52uhrctl0lti5oq8hld612kj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBTM4QKaHvTHXw7v6Ido53YmQI46ERwW9k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "487046925377-u8l39aus52uhrctl0lti5oq8hld612kj.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "487046925377-spdjmn3ie7pnotp1orccp7becuf5d68g.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "snackga.me.app"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

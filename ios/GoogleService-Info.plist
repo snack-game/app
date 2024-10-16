@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>487046925377-spdjmn3ie7pnotp1orccp7becuf5d68g.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.487046925377-spdjmn3ie7pnotp1orccp7becuf5d68g</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>487046925377-5rlk0bk815nmgsuh3gii5on4m7k2se0p.apps.googleusercontent.com</string>
+	<key>API_KEY</key>
+	<string>AIzaSyCGp3xONFtVCf_CKeHGxsFoaSOTevGxXNY</string>
+	<key>GCM_SENDER_ID</key>
+	<string>487046925377</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>snackga.me.app</string>
+	<key>PROJECT_ID</key>
+	<string>snackgame</string>
+	<key>STORAGE_BUCKET</key>
+	<string>snackgame.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:487046925377:ios:6e611027e48531e6bbcac0</string>
+</dict>
+</plist>
