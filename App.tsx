@@ -9,6 +9,7 @@ import { requestDeviceRegister, requestMemberDetails } from '@/apis/Auth';
 import messaging from '@react-native-firebase/messaging';
 import { PermissionsAndroid } from 'react-native';
 import displayNotification from '@/utils/localNotification';
+import ReactNativeHapticFeedback from "react-native-haptic-feedback";
 
 function App(): React.JSX.Element {
   const userStore = useUserStore(state => state);
@@ -51,7 +52,15 @@ function App(): React.JSX.Element {
   }, []);
 
   useEffect(() => {
-    registerDeviceIfAvailable()
+    if (userStore.user) {
+      registerDeviceIfAvailable();
+    }
+  }, [userStore.user]);
+
+  useEffect(() => {
+    if (userStore.user) {
+      ReactNativeHapticFeedback.trigger('notificationSuccess');
+    }
   }, [userStore.user]);
 
   return (

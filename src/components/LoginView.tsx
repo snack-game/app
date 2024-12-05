@@ -1,7 +1,7 @@
-import React, {useEffect} from 'react';
+import React, { useEffect } from 'react';
 
-import {Image, Text, TouchableOpacity, View} from 'react-native';
-import {requestSignInAsGuest} from '@/apis/Auth';
+import { Image, Text, TouchableOpacity, View } from 'react-native';
+import { requestSignInAsGuest } from '@/apis/Auth';
 import GoogleIcon from '@/assets/google-sign-in-icon.svg';
 import KakaoIcon from '@/assets/kakao-sign-in-icon.svg';
 import Logo from '@/assets/logo-snackgame-letter.png';
@@ -17,15 +17,13 @@ import {
   appleAuth,
   AppleButton,
 } from '@invertase/react-native-apple-authentication';
-import {useUserStore} from '@/store';
-import {useSocialSignIn} from '@/hooks/socialSignIn';
+import { useUserStore } from '@/store';
+import { useSocialSignIn } from '@/hooks/socialSignIn';
 
 function LoginView(): React.JSX.Element {
   const translateY = useSharedValue(0);
   const animatedStyle = useAnimatedStyle(() => {
-    return {
-      transform: [{translateY: translateY.value}],
-    };
+    return { transform: [{ translateY: translateY.value }] };
   });
   const userStore = useUserStore(state => state);
   const socialSignIn = useSocialSignIn();
@@ -38,8 +36,8 @@ function LoginView(): React.JSX.Element {
   useEffect(() => {
     translateY.value = withRepeat(
       withSequence(
-        withTiming(-10, {duration: 1000}),
-        withTiming(10, {duration: 1000}),
+        withTiming(-10, { duration: 1000 }),
+        withTiming(10, { duration: 1000 }),
       ),
       -1,
       true,

@@ -1,20 +1,21 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import EStyleSheet from 'react-native-extended-stylesheet';
-import {AppState, AppStateStatus, Linking, Platform, View} from 'react-native';
+import { AppState, AppStateStatus, Linking, Platform, View } from 'react-native';
 import WebView, {
   WebViewMessageEvent,
   WebViewNavigation,
 } from 'react-native-webview';
-import {PATH} from './constants/path.constants';
+import { PATH } from './constants/path.constants';
 import {
   SafeAreaInsetsContext,
   SafeAreaProvider,
 } from 'react-native-safe-area-context';
-import {useUserStore} from '@/store';
+import { useUserStore } from '@/store';
 import CookieManager from '@react-native-cookies/cookies';
 import DeviceInfo from 'react-native-device-info';
-import {requestRenew} from '@/apis/Auth';
-import {useSocialSignIn} from '@/hooks/socialSignIn';
+import { requestRenew } from '@/apis/Auth';
+import { useSocialSignIn } from '@/hooks/socialSignIn';
+import ReactNativeHapticFeedback from "react-native-haptic-feedback";
 
 export default function WebViewContainer(): React.JSX.Element {
   const [appState, setAppState] = useState(AppState.currentState);
@@ -129,6 +130,12 @@ export default function WebViewContainer(): React.JSX.Element {
         );
       }
     }
+    if (!data.type?.startsWith('snackgame')) return;
+    switch (data.type) {
+      case 'snackgame-haptic-feedback':
+        ReactNativeHapticFeedback.trigger(data.method);
+        break;
+    }
   };
 
   useEffect(() => {
@@ -136,13 +143,13 @@ export default function WebViewContainer(): React.JSX.Element {
       if (appState.match(/inactive|background/) && nextAppState === 'active') {
         console.log('App has come to the foreground!');
         webViewRef?.current?.postMessage(
-          JSON.stringify({event: 'app-foreground'}),
+          JSON.stringify({ event: 'app-foreground' }),
         );
       }
       if (appState === 'active' && nextAppState.match(/inactive|background/)) {
         console.log('App has gone to the background!');
         webViewRef?.current?.postMessage(
-          JSON.stringify({event: 'app-background'}),
+          JSON.stringify({ event: 'app-background' }),
         );
       }
       setAppState(nextAppState);
@@ -164,14 +171,13 @@ export default function WebViewContainer(): React.JSX.Element {
         {insets => (
           <View style={styles.container}>
             <View
-              style={{height: insets?.top, backgroundColor: topSafeAreaColor}}
+              style={{ height: insets?.top, backgroundColor: topSafeAreaColor }}
             />
             <WebView
-              userAgent={`SnackgameApp/1.0 (${
-                Platform.OS
-              } ${DeviceInfo.getSystemVersion()}; ${DeviceInfo.getModel()}) AppleWebKit/537.36 (KHTML, like Gecko) Mobile Safari/537.36`}
+              userAgent={`SnackgameApp/1.0 (${Platform.OS
+                } ${DeviceInfo.getSystemVersion()}; ${DeviceInfo.getModel()}) AppleWebKit/537.36 (KHTML, like Gecko) Mobile Safari/537.36`}
               ref={webViewRef}
-              source={{uri}}
+              source={{ uri }}
               thirdPartyCookiesEnabled={true}
               sharedCookiesEnabled={true}
               onNavigationStateChange={onNavigationStateChange}
@@ -183,12 +189,12 @@ export default function WebViewContainer(): React.JSX.Element {
               onMessage={onWebViewMessage}
               injectedJavaScriptBeforeContentLoaded={injectedJavaScript}
               decelerationRate="normal"
-              style={{backgroundColor: topSafeAreaColor}}
+              style={{ backgroundColor: topSafeAreaColor }}
               allowsLinkPreview={false}
             />
             <View
               style={[
-                {height: insets?.bottom, backgroundColor: bottomSafeAreaColor},
+                { height: insets?.bottom, backgroundColor: bottomSafeAreaColor },
                 styles.bottomSafeArea,
               ]}
             />
