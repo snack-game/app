@@ -51,14 +51,6 @@ export default function WebViewContainer(): React.JSX.Element {
     }
   };
 
-  const onShouldStartLoadWithRequest = (navState: WebViewNavigation) => {
-    if (uri && !navState.url.includes(uri)) {
-      Linking.openURL(navState.url);
-      return false;
-    }
-    return true;
-  };
-
   const createCookieScripts = async () => {
     const cookies = await CookieManager.get('https://api.snackga.me/tokens/me');
     return Object.entries(cookies).map(([key, value]) => {
@@ -181,7 +173,6 @@ export default function WebViewContainer(): React.JSX.Element {
               thirdPartyCookiesEnabled={true}
               sharedCookiesEnabled={true}
               onNavigationStateChange={onNavigationStateChange}
-              onShouldStartLoadWithRequest={onShouldStartLoadWithRequest}
               onContentProcessDidTerminate={() => webViewRef.current?.reload()}
               scalesPageToFit={false}
               bounces={true}
