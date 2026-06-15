@@ -179,8 +179,8 @@ export default function WebViewContainer(): React.JSX.Element {
               webviewDebuggingEnabled
               onMessage={onWebViewMessage}
               injectedJavaScriptBeforeContentLoaded={injectedJavaScript}
-              decelerationRate="normal"
-              style={{ backgroundColor: topSafeAreaColor }}
+              decelerationRate={0.985}
+              style={{ backgroundColor: '#FFEDD5' }}
               allowsLinkPreview={false}
             />
             <View
